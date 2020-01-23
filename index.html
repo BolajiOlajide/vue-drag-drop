@@ -1,26 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Simple Vue</title>
+  <title>Drag & Drop (Vue)</title>
+  <style>
+    body {
+      background: #f9f9f9;
+      width: 100vw;
+      height: 100vh;
+      padding: 0;
+      margin: 0;
+    }
+
+    .drag-el {
+      box-shadow: 0 2px 1px #888888;
+      margin: 1rem 0;
+      padding: 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      border: 1px solid grey;
+      background: white;
+    }
+
+    .drop-zone {
+      background-color: #eee;
+      margin: 1rem 0;
+      padding: 10px;
+      min-height: 4rem;
+    }
+  </style>
 </head>
+
 <body>
   <div id="app">
     <p>{{ message }}</p>
-    <p>Copyright &copy; {{ currentYear }} </p>
+    <div style="padding: 4rem">
+      <div class='drop-zone dz-one' @drop='onDrop($event, 1)' @dragover.prevent @dragenter.prevent>
+        <div v-for='item in listOne' :key='item.title' class='drag-el' draggable @dragstart='startDrag($event, item)' @dragend='endDrag($event, item)'>
+          {{ item.title }}
+        </div>
+      </div>
+
+      <div class='drop-zone dz-two' @drop='onDrop($event, 2)' @dragover.prevent @dragenter.prevent>
+        <div v-for='item in listTwo' :key='item.title' class='drag-el' draggable @dragstart='startDrag($event, item)' @dragend='endDrag($event, item)'>
+          {{ item.title }}
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="https://unpkg.com/vue"></script>
-    <script>
-      new Vue({
-        el: '#app',
-        data: {
-          message: 'Hello World!',
-          currentYear: new Date().getFullYear()
+  <script>
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          message: 'Welcome home!',
+          items: [
+            {
+              id: 0,
+              title: 'Item A',
+              list: 1
+            },
+            {
+              id: 1,
+              title: 'Item B',
+              list: 1
+            },
+            {
+              id: 2,
+              title: 'Item C',
+              list: 2
+            }]
         }
-      })
-    </script>
+      },
+      computed: {
+        listOne() {
+          return this.items.filter(item => item.list === 1)
+        },
+        listTwo() {
+          return this.items.filter(item => item.list === 2)
+        }
+      },
+      methods: {
+        startDrag: (evt, item) => {
+          evt.dataTransfer.dropEffect = 'move'
+          evt.dataTransfer.effectAllowed = 'move'
+          evt.dataTransfer.setData('itemID', item.id)
+          evt.target.style.backgroundColor = '#6CABF7'
+        },
+
+        endDrag(evt, item) {
+          evt.target.style.backgroundColor = '#FFF'
+        },
+
+        onDrop(evt, list) {
+          const itemID = evt.dataTransfer.getData('itemID')
+          const item = this.items.find(item => item.id == itemID)
+          item.list = list
+          console.log('dropppping')
+        }
+      }
+    })
+  </script>
 </body>
 </html>
